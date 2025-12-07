@@ -10,12 +10,11 @@ import dev.peerat.parser.java.Class;
 import dev.peerat.parser.java.JavaElement;
 import dev.peerat.parser.java.JavaFile;
 import dev.peerat.parser.java.JavaProject;
+import dev.peerat.parser.java.builder.JavaBuilder;
 import dev.peerat.parser.java.visitor.JavaClassVisitor;
 import dev.peerat.parser.visitor.Visitor;
-import dev.peerat.tools.codegen.CodeParser;
-import dev.peerat.tools.codegen.Template;
 
-public class InternalClass extends Template{
+public class InternalClass{
 
 	private String pack;
 	private String name;
@@ -32,10 +31,9 @@ public class InternalClass extends Template{
 	public Class create(JavaProject project) throws Exception{
 		Class clazz = get(project);
 		if(clazz != null) return clazz;
-
-		CodeParser code = loadTemplate("class");
 		
-		JavaFile file = (JavaFile) code.getElement();
+		JavaFile file = JavaBuilder.ofFile(pack).build();
+		file.addClass(JavaBuilder.ofClass(name).build());
 		
 		project.addFile(file, true);
 		
@@ -44,9 +42,8 @@ public class InternalClass extends Template{
 		file.getPackage().setToken(pack);
 		clazz.setName(name);
 		return clazz;
-		
 	}
-	
+
 	public Visitor<JavaElement> visitor(Consumer<JavaClassVisitor> visitorConsumer){
 		JavaClassVisitor visitor = clazz().name((s) -> s.equals(name));
 		visitorConsumer.accept(visitor);
