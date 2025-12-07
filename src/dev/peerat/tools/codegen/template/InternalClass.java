@@ -11,6 +11,7 @@ import dev.peerat.parser.java.JavaElement;
 import dev.peerat.parser.java.JavaFile;
 import dev.peerat.parser.java.JavaProject;
 import dev.peerat.parser.java.builder.JavaBuilder;
+import dev.peerat.parser.java.builder.JavaClassBuilder;
 import dev.peerat.parser.java.visitor.JavaClassVisitor;
 import dev.peerat.parser.visitor.Visitor;
 
@@ -28,19 +29,26 @@ public class InternalClass{
 		return get(project) != null;
 	}
 	
-	public Class create(JavaProject project) throws Exception{
+	public Class createIfAbsent(JavaProject project) throws Exception{
+		return createIfAbsent(project, null);
+	}
+	
+	public Class createIfAbsent(JavaProject project, Consumer<JavaClassBuilder> builder) throws Exception{
 		Class clazz = get(project);
-		if(clazz != null) return clazz;
-		
+		return clazz != null ? clazz : create(project, builder);
+	}
+	
+	public Class create(JavaProject project) throws Exception{
+		return create(project, null);
+	}
+	
+	public Class create(JavaProject project, Consumer<JavaClassBuilder> builder) throws Exception{
 		JavaFile file = JavaBuilder.ofFile(pack).build();
-		file.addClass(JavaBuilder.ofClass(name).build());
-		
+		JavaClassBuilder classBuilder = JavaBuilder.ofClass(name);
+		if(builder != null) builder.accept(classBuilder);
+		Class clazz;
+		file.addClass(clazz = classBuilder.build());
 		project.addFile(file, true);
-		
-		clazz = ((Class)file.getMainClass());
-		
-		file.getPackage().setToken(pack);
-		clazz.setName(name);
 		return clazz;
 	}
 

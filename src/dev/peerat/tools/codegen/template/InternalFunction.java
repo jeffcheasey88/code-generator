@@ -1,6 +1,8 @@
 package dev.peerat.tools.codegen.template;
 
-import static dev.peerat.parser.java.visitor.JavaVisitor.*;
+import static dev.peerat.parser.java.visitor.JavaVisitor.classBase;
+import static dev.peerat.parser.java.visitor.JavaVisitor.collect;
+import static dev.peerat.parser.java.visitor.JavaVisitor.function;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -9,6 +11,7 @@ import dev.peerat.parser.java.ClassBase;
 import dev.peerat.parser.java.Function;
 import dev.peerat.parser.java.Variable;
 import dev.peerat.parser.java.builder.JavaBuilder;
+import dev.peerat.parser.java.builder.JavaFunctionBuilder;
 import dev.peerat.parser.java.visitor.JavaClassBaseVisitor;
 import dev.peerat.parser.java.visitor.JavaFunctionVisitor;
 
@@ -26,13 +29,27 @@ public class InternalFunction{
 		return get(base) != null;
 	}
 	
-	public Function create(ClassBase base) throws Exception{
+	public Function createIfAbsent(ClassBase base) throws Exception{
+		return createIfAbsent(base, null);
+	}
+	
+	public Function createIfAbsent(ClassBase base, Consumer<JavaFunctionBuilder> builder) throws Exception{
 		Function function = get(base);
-		if(function != null) return function;
-		
-		function = JavaBuilder.ofFunction(null, this.name).build();
-		//TODO builder include native types & set parameters
-		base.getElements().add(function);
+		return function != null ? function : create(base, builder);
+	}
+	
+	public Function create(ClassBase base) throws Exception{
+		return create(base, null);
+	}
+	
+	public Function create(ClassBase base, Consumer<JavaFunctionBuilder> builder) throws Exception{
+		JavaFunctionBuilder functionBuilder = JavaBuilder.ofFunction(null, this.name);
+		if(this.parameters != null){
+			for(Variable variable : this.parameters) functionBuilder.parameter(variable);
+		}
+		if(builder != null) builder.accept(functionBuilder);
+		Function function = functionBuilder.build();
+		base.addFunction(function);
 		return function;
 	}
 	
