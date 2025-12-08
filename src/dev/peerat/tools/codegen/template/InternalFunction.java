@@ -9,18 +9,27 @@ import java.util.function.Consumer;
 
 import dev.peerat.parser.java.ClassBase;
 import dev.peerat.parser.java.Function;
+import dev.peerat.parser.java.JavaElement;
+import dev.peerat.parser.java.JavaFile;
 import dev.peerat.parser.java.Variable;
 import dev.peerat.parser.java.builder.JavaBuilder;
 import dev.peerat.parser.java.builder.JavaFunctionBuilder;
 import dev.peerat.parser.java.visitor.JavaClassBaseVisitor;
 import dev.peerat.parser.java.visitor.JavaFunctionVisitor;
+import dev.peerat.tools.codegen.Internal;
+import dev.peerat.tools.codegen.Tracker;
 
-public class InternalFunction{
+public class InternalFunction extends Internal{
 
 	private String name;
 	private List<Variable> parameters;
 
 	public InternalFunction(String name, List<Variable> parameters){
+		this(null, name, parameters);
+	}
+	
+	public InternalFunction(Tracker tracker, String name, List<Variable> parameters){
+		super(tracker);
 		this.name = name;
 		this.parameters = parameters;
 	}
@@ -50,6 +59,8 @@ public class InternalFunction{
 		if(builder != null) builder.accept(functionBuilder);
 		Function function = functionBuilder.build();
 		base.addFunction(function);
+		
+		trackElement(base);
 		return function;
 	}
 	

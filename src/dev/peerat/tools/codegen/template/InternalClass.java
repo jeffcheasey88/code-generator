@@ -14,13 +14,20 @@ import dev.peerat.parser.java.builder.JavaBuilder;
 import dev.peerat.parser.java.builder.JavaClassBuilder;
 import dev.peerat.parser.java.visitor.JavaClassVisitor;
 import dev.peerat.parser.visitor.Visitor;
+import dev.peerat.tools.codegen.Internal;
+import dev.peerat.tools.codegen.Tracker;
 
-public class InternalClass{
+public class InternalClass extends Internal{
 
 	private String pack;
 	private String name;
 	
 	public InternalClass(String pack, String name){
+		this(null, pack, name);
+	}
+	
+	public InternalClass(Tracker tracker, String pack, String name){
+		super(tracker);
 		this.pack = pack;
 		this.name = name;
 	}
@@ -49,6 +56,7 @@ public class InternalClass{
 		Class clazz;
 		file.addClass(clazz = classBuilder.build());
 		project.addFile(file, true);
+		track(file);
 		return clazz;
 	}
 

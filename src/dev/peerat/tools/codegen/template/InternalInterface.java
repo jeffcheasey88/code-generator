@@ -14,13 +14,20 @@ import dev.peerat.parser.java.builder.JavaBuilder;
 import dev.peerat.parser.java.builder.JavaInterfaceBuilder;
 import dev.peerat.parser.java.visitor.JavaInterfaceVisitor;
 import dev.peerat.parser.visitor.Visitor;
+import dev.peerat.tools.codegen.Internal;
+import dev.peerat.tools.codegen.Tracker;
 
-public class InternalInterface{
+public class InternalInterface extends Internal{
 
 	private String pack;
 	private String name;
 	
 	public InternalInterface(String pack, String name){
+		this(null, pack, name);
+	}
+	
+	public InternalInterface(Tracker tracker, String pack, String name){
+		super(tracker);
 		this.pack = pack;
 		this.name = name;
 	}
@@ -49,6 +56,7 @@ public class InternalInterface{
 		Interface clazz;
 		file.addClass(clazz = classBuilder.build());
 		project.addFile(file, true);
+		track(file);
 		return clazz;
 	}
 

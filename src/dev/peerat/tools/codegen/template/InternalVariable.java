@@ -14,23 +14,30 @@ import dev.peerat.parser.java.builder.JavaVariableBuilder;
 import dev.peerat.parser.java.value.Value;
 import dev.peerat.parser.java.visitor.JavaVariableVisitor;
 import dev.peerat.parser.visitor.Visitor;
+import dev.peerat.tools.codegen.Internal;
+import dev.peerat.tools.codegen.Tracker;
 
-public class InternalVariable{
+public class InternalVariable extends Internal{
 	
 	private String type;
 	private String name;
 	private Value value;
 	
+	public InternalVariable(String type, String name, String value){
+		this(type, name, JavaBuilder.ofValue(value));
+	}
+	
 	public InternalVariable(String type, String name, Value value){
+		this(null, type, name, value);
+	}
+	
+	public InternalVariable(Tracker tracker, String type, String name, Value value){
+		super(tracker);
 		this.type = type;
 		this.name = name;
 		this.value = value;
 	}
 	
-	public InternalVariable(String type, String name, String value){
-		this(type, name, JavaBuilder.ofValue(value));
-	}
-
 	public boolean exist(ClassBase clazz){
 		return get(clazz) != null;
 	}
@@ -53,6 +60,7 @@ public class InternalVariable{
 		if(builder != null) builder.accept(variableBuilder);
 		Variable variable = variableBuilder.build();
 		clazz.addVariable(variable);
+		trackElement(clazz);
 		return variable;
 	}
 	
