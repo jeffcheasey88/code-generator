@@ -1,11 +1,11 @@
 package dev.peerat.tools.codegen;
 
-
 import java.util.List;
 
 import dev.peerat.parser.java.JavaElement;
 import dev.peerat.parser.java.JavaFile;
 import dev.peerat.parser.java.JavaParser;
+import dev.peerat.parser.java.JavaTokenizer;
 import dev.peerat.parser.java.tree.JavaTreeType;
 import dev.peerat.parser.tokens.Token;
 import dev.peerat.parser.tokens.TokenizerResult;
@@ -37,7 +37,7 @@ public class CodeParser{
 		private Parser(){
 			JavaTreeType[] values = JavaTreeType.values();
 			this.parsers = new JavaParser[values.length];
-			for(int i = values.length-1, j = 0; i >= 0; i--, j++) this.parsers[j] = new JavaParser(values[i]);
+			for(int i = values.length-1, j = 0; i >= 0; i--, j++) this.parsers[j] = new JavaParser(values[i], JavaTokenizer.ALL);
 		}
 		
 		private void parse(CodeParser result, String code) throws Exception{
