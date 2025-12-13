@@ -1,6 +1,7 @@
 package dev.peerat.tools.codegen;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import dev.peerat.parser.java.JavaElement;
 import dev.peerat.parser.java.JavaFile;
@@ -22,6 +23,8 @@ public class CodeParser{
 		PARSER.parse(this, code);
 	}
 	
+	public CodeParser(){}
+	
 	public JavaElement getElement(){
 		return this.element;
 	}
@@ -30,17 +33,25 @@ public class CodeParser{
 		return this.tokens;
 	}
 	
-	private static class Parser{
+	static class Parser{
 		
 		private JavaParser[] parsers;
 		
-		private Parser(){
-			JavaTreeType[] values = JavaTreeType.values();
-			this.parsers = new JavaParser[values.length];
-			for(int i = values.length-1, j = 0; i >= 0; i--, j++) this.parsers[j] = new JavaParser(values[i], JavaTokenizer.ALL);
+		Parser(){
+			this(JavaTokenizer.ALL, parser -> {});
 		}
 		
-		private void parse(CodeParser result, String code) throws Exception{
+		Parser(int options, Consumer<JavaParser> modifier){
+			JavaTreeType[] values = JavaTreeType.values();
+			this.parsers = new JavaParser[values.length];
+			for(int i = values.length-1, j = 0; i >= 0; i--, j++){
+				JavaParser parser = new JavaParser(values[i], options);
+				modifier.accept(parser);
+				this.parsers[j] = parser;
+			}
+		}
+		
+		void parse(CodeParser result, String code) throws Exception{
 			JavaContainer container = new JavaContainer();
 			TokenizerResult tokens = null;
 			for(int i = 0; i < parsers.length-1; i++){

@@ -9,8 +9,6 @@ import java.util.function.Consumer;
 
 import dev.peerat.parser.java.ClassBase;
 import dev.peerat.parser.java.Function;
-import dev.peerat.parser.java.JavaElement;
-import dev.peerat.parser.java.JavaFile;
 import dev.peerat.parser.java.Variable;
 import dev.peerat.parser.java.builder.JavaBuilder;
 import dev.peerat.parser.java.builder.JavaFunctionBuilder;
