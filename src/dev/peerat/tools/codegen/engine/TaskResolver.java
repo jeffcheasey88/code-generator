@@ -17,18 +17,7 @@ public class TaskResolver{
 		List<Task> list = this.tasks.get(name);
 		if(list == null) return null;
 		for(Task task : list){
-			Class<?>[] parameterTypes = task.getParameters();
-			//TODO CONTEXT
-			if(parameterTypes.length != parameters.length) continue;
-			boolean find = true;
-			for(int i = 0; i < parameterTypes.length; i++){
-				if(parameters[i] == null) continue;
-				if(!parameterTypes[i].isAssignableFrom(parameters[i].getClass())){
-					find = false;
-					break;
-				}
-			}
-			if(find) return task;
+			if(task.isAssignable(parameters)) return task;
 		}
 		return null;
 	}

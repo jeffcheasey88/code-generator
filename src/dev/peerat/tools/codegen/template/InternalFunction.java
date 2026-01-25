@@ -50,7 +50,7 @@ public class InternalFunction extends Internal{
 	}
 	
 	public Function create(ClassBase base, Consumer<JavaFunctionBuilder> builder) throws Exception{
-		JavaFunctionBuilder functionBuilder = JavaBuilder.ofFunction(null, this.name);
+		JavaFunctionBuilder functionBuilder = JavaBuilder.ofFunction("void", this.name);
 		if(this.parameters != null){
 			for(Variable variable : this.parameters) functionBuilder.parameter(variable);
 		}
