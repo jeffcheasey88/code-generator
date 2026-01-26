@@ -1,5 +1,9 @@
 package dev.peerat.tools.codegen.engine;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class Task{
 	
 	private String name;
@@ -16,17 +20,35 @@ public class Task{
 		return this.name;
 	}
 	
+	public int getParameterCount(){
+		return this.parameters.length;
+	}
+	
 	public boolean is(String name){
 		return this.name.equals(name);
 	}
 	
-	public boolean isAssignable(Object[] parameters){
-		if(this.parameters.length != parameters.length) return false; //TODO CONTEXT
-		for(int i = 0; i < this.parameters.length; i++){
-			if(parameters[i] == null) continue;
-			if(!this.parameters[i].isAssignableFrom(parameters[i].getClass())) return false;
+	public Object[] isAssignable(Object[] parameters){
+		if(parameters.length < this.parameters.length) return null;
+		Object[] result = new Object[this.parameters.length];
+		List<Object> list = new ArrayList<>(parameters.length);
+		for(Object obj : parameters) list.add(obj);
+		int index;
+		int resultIndex = 0;
+		for(Class<?> type : this.parameters){
+			index = -1;
+			for(int i = 0; i < list.size(); i++){
+				Object parameter = list.get(i);
+				if(parameter == null) index = i;
+				else if(type.isAssignableFrom(parameter.getClass())){
+					index = i;
+					break;
+				}
+			}
+			if(index < 0) return null;
+			result[resultIndex++] = list.remove(index);
 		}
-		return true;
+		return result;
 	}
 	
 	public boolean isAssignable(Class<?>[] parameterTypes){

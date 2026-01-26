@@ -13,11 +13,12 @@ public class TaskResolver{
 		this.tasks = new HashMap<>();
 	}
 	
-	public Task resolveTask(String name, Object[] parameters){
+	public Executable resolveTask(String name, Object[] parameters){
 		List<Task> list = this.tasks.get(name);
 		if(list == null) return null;
 		for(Task task : list){
-			if(task.isAssignable(parameters)) return task;
+			Object[] result = task.isAssignable(parameters);
+			if(result != null) return new Executable(task, result);
 		}
 		return null;
 	}
@@ -25,7 +26,14 @@ public class TaskResolver{
 	public void rule(String name, Class<?>[] types, Executor executor){
 		List<Task> list = this.tasks.get(name);
 		if(list == null) this.tasks.put(name, list = new ArrayList<>());
-		list.add(new Task(name, executor, types));
+		
+		int index = 0;
+		for(int i = 0; i < list.size(); i++){
+			if(types.length < list.get(i).getParameterCount()) continue;
+			index = i;
+			break;
+		}
+		list.add(index, new Task(name, executor, types));
 	}
 	
 

@@ -1,10 +1,13 @@
 package dev.peerat.tools.codegen.unnamedtasks;
 
+import static dev.peerat.parser.java.builder.JavaBuilder.ofClass;
+import static dev.peerat.parser.java.builder.JavaBuilder.ofFile;
+import static dev.peerat.parser.java.builder.JavaBuilder.ofVariable;
 import static dev.peerat.parser.java.visitor.JavaVisitor.allClass;
 import static dev.peerat.parser.java.visitor.JavaVisitor.allVariable;
 import static dev.peerat.parser.java.visitor.JavaVisitor.collect;
-import static dev.peerat.parser.java.builder.JavaBuilder.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -21,6 +24,7 @@ public class UnamedExample{
 		ElementEngine engine = new ElementEngine();
 		
 		engine.rule("create accessor", JavaProject.class, (project) -> {
+			System.out.println("create accessor JavaProject");
 			List<dev.peerat.parser.java.Class> classes = project.visit(collect(allClass())).toList();
 			
 			for(dev.peerat.parser.java.Class clazz : classes) engine.task("create accessor", clazz);
@@ -28,16 +32,21 @@ public class UnamedExample{
 		});
 		
 		engine.rule("create accessor", dev.peerat.parser.java.Class.class, (clazz) -> {
-			List<Variable> variables = engine.<List<Variable>>task("all variables", clazz).get();
+			System.out.println("create accessor Class");
+			List<Variable> variables = new ArrayList<>();
+			engine.context(() -> {
+				variables.addAll(engine.<List<Variable>>task("all variables").get());
+			},clazz);
 			
 			for(Variable variable : variables){
-				TaskResult<Variable> result = engine.task("create accessor", clazz, variable);
+				TaskResult<Variable> result = engine.task("create accessor", variable);
 			}
 			
 			return clazz;
 		});
 		
 		engine.rule("create accessor", dev.peerat.parser.java.Class.class, Variable.class, (clazz, variable) -> {
+			System.out.println("create accessor Class, Variable");
 			if(variable.getType().getName().getValue().equals("Integer")){
 				engine.duplicate("create accessor", dev.peerat.parser.java.Class.class, Variable.class, clazz, ofVariable(variable).setType("int").build());
 			}
@@ -46,6 +55,7 @@ public class UnamedExample{
 		});
 		
 		engine.rule("all variables", ClassBase.class, (classBase) -> {
+			System.out.println("all variables ClassBase");
 			List<Variable> variables = classBase.visit(collect(allVariable())).toList();
 			
 			if(classBase instanceof dev.peerat.parser.java.Class){
