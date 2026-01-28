@@ -1,19 +1,21 @@
 package dev.peerat.tools.codegen.engine;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 public class Task{
 	
 	private String name;
 	private Executor executor;
 	private Class<?>[] parameters;
+	private Function<Object, Object>[] mappers;
 	
-	public Task(String name, Executor executor, Class<?>[] parameters){
+	public Task(String name, Executor executor, Class<?>[] parameters, Function<Object, Object>[] mappers){
 		this.name = name;
 		this.executor = executor;
 		this.parameters = parameters;
+		this.mappers = mappers;
 	}
 	
 	public String getName(){
@@ -22,6 +24,18 @@ public class Task{
 	
 	public int getParameterCount(){
 		return this.parameters.length;
+	}
+	
+	public Class<?>[] getParameters(){
+		return this.parameters;
+	}
+	
+	public Function<Object, Object>[] getMappers(){
+		return this.mappers;
+	}
+	
+	public Executor getExecutor(){
+		return this.executor;
 	}
 	
 	public boolean is(String name){
@@ -60,6 +74,13 @@ public class Task{
 	}
 	
 	public <T> TaskResult<T> execute(Object[] parameters){
+		if(mappers != null){
+			for(int i = 0; i < this.mappers.length; i++){
+				Function<Object, Object> mapper = this.mappers[i];
+				if(mapper == null) continue;
+				parameters[i] = mapper.apply(parameters[i]);
+			}
+		}
 		return new TaskResult<>(this.executor.exec(parameters));
 	}
 	

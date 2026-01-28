@@ -2,6 +2,7 @@ package dev.peerat.tools.codegen.engine;
 
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.function.Function;
 
 import dev.peerat.tools.codegen.engine.Executor.BiExecutor;
 import dev.peerat.tools.codegen.engine.Executor.SingleExecutor;
@@ -77,6 +78,10 @@ public class ElementEngine{
 
 	public <A, B, C> void rule(String name, Class<A> type, Class<B> secondType, Class<C> thirdType, TriExecutor<A, B, C> executor){
 		this.taskResolver.rule(name, new Class<?>[]{type, secondType, thirdType}, executor);
+	}
+	
+	public <A, B> void redirect(Class<A> originType, Class<B> targetType, Function<B, A> mapper){
+		this.taskResolver.redirect(originType, targetType, (Function<Object, Object>) mapper);
 	}
 	
 }

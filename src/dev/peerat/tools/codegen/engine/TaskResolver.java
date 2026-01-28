@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public class TaskResolver{
 	
 	private Map<String, List<Task>> tasks;
+	private List<Redirection> redirections;
 	
 	public TaskResolver(){
 		this.tasks = new HashMap<>();
+		this.redirections = new ArrayList<>();
 	}
 	
 	public Executable resolveTask(String name, Object[] parameters){
@@ -24,6 +27,10 @@ public class TaskResolver{
 	}
 	
 	public void rule(String name, Class<?>[] types, Executor executor){
+		rule(name, types, executor, null);
+	}
+	
+	public void rule(String name, Class<?>[] types, Executor executor, Function<Object, Object>[] mappers){
 		List<Task> list = this.tasks.get(name);
 		if(list == null) this.tasks.put(name, list = new ArrayList<>());
 		
@@ -33,7 +40,46 @@ public class TaskResolver{
 			index = i;
 			break;
 		}
-		list.add(index, new Task(name, executor, types));
+		Task task = new Task(name, executor, types, mappers);
+		list.add(index, task);
+		for(Redirection redirect : this.redirections) applyRedirect(redirect, task);
+	}
+	
+	public void redirect(Class<?> origin, Class<?> target, Function<Object, Object> mapper){
+		Redirection redirect = new Redirection(origin, target, mapper);
+		this.redirections.add(redirect);
+		for(List<Task> tasks : this.tasks.values()){
+			for(Task task : tasks) applyRedirect(redirect, task);
+		}
+	}
+	
+	private void applyRedirect(Redirection redirection, Task task){
+		Class<?>[] parameters = task.getParameters();
+		Function<Object, Object>[] mappers = task.getMappers();
+		for(int i = 0; i < parameters.length; i++){
+			if(parameters[i].equals(redirection.getOriginType())){
+				if(mappers == null){
+					mappers = new Function[i+1];
+					mappers[i] = redirection.getMapper();
+				}else if(mappers.length <= i){
+					Function<Object, Object>[] copy = new Function[i+1];
+					System.arraycopy(mappers, 0, copy, 0, mappers.length);
+					mappers = copy;
+					mappers[i] = redirection.getMapper();
+				}else if(mappers[i] == null){
+					mappers[i] = redirection.getMapper();
+				}else{
+					Function<Object, Object> map = mappers[i];
+					Function<Object, Object> redirect = redirection.getMapper();
+					mappers[i] = (value) -> redirect.apply(map.apply(value));
+				}
+				Class<?>[] adaptedParameters = new Class[parameters.length];
+				System.arraycopy(parameters, 0, adaptedParameters, 0, parameters.length);
+				adaptedParameters[i] = redirection.getTargetType();
+				rule(task.getName(), adaptedParameters, task.getExecutor(), mappers);
+				break;
+			}
+		}
 	}
 	
 
