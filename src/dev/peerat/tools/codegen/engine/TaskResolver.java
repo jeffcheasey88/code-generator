@@ -45,8 +45,35 @@ public class TaskResolver{
 		for(Redirection redirect : this.redirections) applyRedirect(redirect, task);
 	}
 	
-	public void redirect(Class<?> origin, Class<?> target, Function<Object, Object> mapper){
-		Redirection redirect = new Redirection(origin, target, mapper);
+	public void overrideRule(String name, Class<?>[] types, Executor executor){
+		List<Task> list = this.tasks.get(name);
+		Task task = new Task(name, executor, types, null);
+		if(list == null) {
+			 this.tasks.put(name, list = new ArrayList<>());
+			 list.add(task);
+			 return;
+		}
+		int index = -1;
+		for(int i = 0; i < list.size(); i++){
+			Class<?>[] parameters = list.get(i).getParameters();
+			if(types.length != parameters.length) continue;
+			boolean isThis = true;
+			for(int j = 0; j < types.length; j++){
+				if(!types[j].equals(parameters[j])){
+					isThis = false;
+					break;
+				}
+			}
+			if(!isThis) continue;
+			index = i;
+			break;
+		}
+		if(index < 0) return;
+		list.set(index, task);
+	}
+	
+	public void redirect(Class<?> origin, Class<?> target, Function<?, ?> mapper){
+		Redirection redirect = new Redirection(origin, target, (Function<Object, Object>)mapper);
 		this.redirections.add(redirect);
 		for(List<Task> tasks : this.tasks.values()){
 			for(Task task : tasks) applyRedirect(redirect, task);

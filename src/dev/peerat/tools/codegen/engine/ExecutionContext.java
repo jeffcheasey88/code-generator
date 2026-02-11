@@ -1,6 +1,5 @@
 package dev.peerat.tools.codegen.engine;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,6 +18,10 @@ public class ExecutionContext{
 
 	public void task(Task task){
 		this.history.add(task);
+	}
+	
+	public List<Task> getHistory(){
+		return new LinkedList<>(history);
 	}
 	
 	public void done(TaskResult<?> result){
