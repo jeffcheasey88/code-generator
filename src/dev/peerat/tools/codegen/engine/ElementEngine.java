@@ -2,6 +2,7 @@ package dev.peerat.tools.codegen.engine;
 
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -108,6 +109,30 @@ public class ElementEngine{
 	
 	public <T> void rule(Predicate<T> predicate, String context, Consumer<T> consumer){
 		this.ruler.rule(predicate, context, consumer);
+	}
+	
+	public <T> void rule(Predicate<T> predicate, BiConsumer<T, ExecutionContext> consumer){
+		this.ruler.rule(predicate, consumer);
+	}
+	
+	public <T> void rule(Predicate<T> predicate, String context, BiConsumer<T, ExecutionContext> consumer){
+		this.ruler.rule(predicate, context, consumer);
+	}
+	
+	public <T> void rule(Predicate<T> predicate, Predicate<Class<?>> dependencyPredicate, Consumer<T> consumer){
+		this.ruler.rule(predicate, dependencyPredicate, consumer);
+	}
+	
+	public <T> void rule(Predicate<T> predicate, String context, Predicate<Class<?>> dependencyPredicate, Consumer<T> consumer){
+		this.ruler.rule(predicate, context, dependencyPredicate, consumer);
+	}
+	
+	public <T> void rule(Predicate<T> predicate, Predicate<Class<?>> dependencyPredicate, BiConsumer<T, ExecutionContext> consumer){
+		this.ruler.rule(predicate, dependencyPredicate, consumer);
+	}
+	
+	public <T> void rule(Predicate<T> predicate, String context, Predicate<Class<?>> dependencyPredicate, BiConsumer<T, ExecutionContext> consumer){
+		this.ruler.rule(predicate, context, dependencyPredicate, consumer);
 	}
 	
 	public void element(Object element){

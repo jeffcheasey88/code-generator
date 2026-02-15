@@ -15,16 +15,33 @@ public class ExecutionContext{
 		this.history = new LinkedList<>();
 		this.parameters = new HashMap<>();
 	}
-
-	public void task(Task task){
-		this.history.add(task);
-	}
 	
 	public List<Task> getHistory(){
 		return new LinkedList<>(history);
 	}
 	
-	public void done(TaskResult<?> result){
+	public <T> T getDependency(Class<T> type){
+		Object assignable = null;
+		boolean multiple = false;
+		for(Object dependency : dependencies){
+			if(dependency.getClass().equals(type)) return (T) dependency;
+			if(type.isAssignableFrom(dependency.getClass())){
+				if(assignable != null){
+					multiple = true;
+					continue;
+				}
+				assignable = dependency;
+			}
+		}
+		if(multiple) throw new IllegalArgumentException("Multiple dependencies can be assign from "+type);
+		return (T) assignable;
+	}
+
+	void task(Task task){
+		this.history.add(task);
+	}
+	
+	void done(TaskResult<?> result){
 		Task last = this.history.remove(this.history.size()-1);
 		
 		List<Object[]> list = this.parameters.get(last);
@@ -39,11 +56,11 @@ public class ExecutionContext{
 		}
 	}
 	
-	public Object[] getDependencies(){
+	Object[] getDependencies(){
 		return this.dependencies;
 	}
 	
-	public void addDependencies(Object[] dependencies){
+	void addDependencies(Object[] dependencies){
 		if(this.dependencies == null){
 			this.dependencies = dependencies;
 			return;
@@ -54,7 +71,7 @@ public class ExecutionContext{
 		this.dependencies = copy;
 	}
 	
-	public void removeDependencies(Object[] dependencies){
+	void removeDependencies(Object[] dependencies){
 		if(this.dependencies == null || this.dependencies.length == 0) return;
 		int position = -1;
 		for(int i = 0; i < (this.dependencies.length-dependencies.length)+1; i++){
@@ -77,7 +94,7 @@ public class ExecutionContext{
 		this.dependencies = copy;
 	}
 	
-	public void duplicate(String name, Class<?>[] types, Object[] parameters){
+	void duplicate(String name, Class<?>[] types, Object[] parameters){
 		Task target = null;
 		for(Task task : history){
 			if(task.is(name) && task.isAssignable(types)){
